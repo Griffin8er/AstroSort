@@ -17,7 +17,8 @@ authors = [
 
 dependencies = [
     "numpy>=1.26",
-    "pandas>=3.0.2"
+    "pandas>=3.0.0",
+    "importlib>=1.0.4"
 ]
 
 classifiers = [
