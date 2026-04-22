@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "AstroSort"
-version = "0.0.1"
+version = "0.0.2"
 description = "This project allows a user to find optimal astrophotography shooting coordinates for their setup."
 readme = "README.md"
 requires-python = ">=3.13"
@@ -31,4 +31,4 @@ classifiers = [
 where = ["src"]
 
 [tool.setuptools.package-data]
-"AstroSort.data" = ["*.csv"]
+"AstroSort._data" = ["*.csv"]
