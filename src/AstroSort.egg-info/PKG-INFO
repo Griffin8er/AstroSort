@@ -685,4 +685,5 @@ Description-Content-Type: text/markdown
 License-File: LICENSE
 Requires-Dist: numpy>=1.26
 Requires-Dist: pandas>=3.0.2
+Requires-Dist: importlib
 Dynamic: license-file
