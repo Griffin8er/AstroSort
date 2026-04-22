@@ -1,0 +1,33 @@
+[build-system]
+requires = ["setuptools>=77.0.3"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "AstroSort"
+version = "1.0.0"
+description = "This project allows a user to find optimal astrophotography shooting coordinates for their setup."
+readme = "README.md"
+requires-python = ">=3.13"
+
+license = { file = "LICENSE" }
+
+authors = [
+    { name = "Griffin Richard Carroll" }
+]
+
+dependencies = [
+    "numpy>=1.26",
+    "pandas>=3.0.2"
+]
+
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: GNU General Public License v3 (GPLv3)",
+    "Operating System :: OS Independent",
+]
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-data]
+"AstroSort.data" = ["*.csv"]
