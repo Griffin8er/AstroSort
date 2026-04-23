@@ -1,6 +1,6 @@
 Metadata-Version: 2.4
 Name: AstroSort
-Version: 1.0.0
+Version: 0.0.3
 Summary: This project allows a user to find optimal astrophotography shooting coordinates for their setup.
 Author: Griffin Richard Carroll
 License: GNU GENERAL PUBLIC LICENSE
@@ -684,6 +684,6 @@ Requires-Python: >=3.13
 Description-Content-Type: text/markdown
 License-File: LICENSE
 Requires-Dist: numpy>=1.26
-Requires-Dist: pandas>=3.0.2
+Requires-Dist: pandas>=3.0.0
 Requires-Dist: importlib>=1.0.4
 Dynamic: license-file

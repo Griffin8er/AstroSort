@@ -1,6 +1,6 @@
 import math
 import pandas as pd
-import importlib
+from importlib.resources import files
 
 class AstroObject:
     def __init__(self, name, ra_rad, dec_rad, X = None, Y = None, PA = None):
@@ -11,11 +11,8 @@ class AstroObject:
         self.Y = Y
         self.PA = PA
 
-
-def load_base_dataset():
-    # Get the path to the data file inside the installed package
-    with importlib.resources.files('AstroSort_Grcar').joinpath('_data', 'NI2026.csv').open('r') as f:
-        return pd.read_csv(f)
+def _load_base_dataset():
+    return files("AstroSort._data").joinpath("NI2026.csv")
 
 def _parse_ra(RH, RM, RS):
     hours = float(RH) + float(RM)/60 + float(RS)/3600
@@ -158,7 +155,9 @@ def _project_gnomonic(ra, dec, ra0, dec0):
 
     return x, y
 
-def _load_ngc_ic_catalog(df):
+def _load_ngc_ic_catalog(data_path):
+
+    df = pd.read_csv(data_path, encoding="cp1252")
 
     catalog = {}
 
@@ -205,13 +204,12 @@ def _load_ngc_ic_catalog(df):
 
 def required_fov_from_names(
         names,
-        data, 
         padding_percentage=0.0,
         setup_X=2.59,
         setup_Y=2.59,
         ):
 
-    catalog = _load_ngc_ic_catalog(data)
+    catalog = _load_ngc_ic_catalog(_load_base_dataset())
 
     objects = []
 
@@ -328,7 +326,6 @@ def required_fov_from_names(
 
 result = required_fov_from_names(
     ["NGC 3031", "NGC 3034"],
-    data = load_base_dataset(),
     setup_X=2.59,
     setup_Y=2.59,
     padding_percentage=5
