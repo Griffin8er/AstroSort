@@ -3,25 +3,38 @@ import pandas as pd
 from ._utils import Utils
 from ._loader import DataLoader
 
-def required_fov_from_names(
+
+def fov_checker(
         names,
         padding_percentage=0.0,
-        setup_X=2.59,
-        setup_Y=2.59,
+        fov_width=2.59,
+        fov_height=2.59,
         ):
 
-    catalogs = dict()
+    if not names:
+        raise ValueError("names list cannot be empty")
 
+    if fov_width <= 0 or fov_height <= 0:
+        raise ValueError("FOV dimensions must be positive")
+
+    if padding_percentage < 0:
+        raise ValueError("padding_percentage must be >= 0")
+    
+    catalog = {}
+
+    loaded_ngc = False
+    loaded_messier = False
 
     for name in names:
         name = Utils._text_normalize(name)
 
-        if name.startswith("ngc") or name.startswith("ic"):
-            catalog = DataLoader("ngc")._load_ngc_ic_catalog()
-            catalogs[name] = catalog
-        elif name.startswith("m") or name.startswith("messier"):
-            catalog = DataLoader("m")._load_messier_catalog()
-            catalogs[name] = catalog
+        if (name.startswith("ngc") or name.startswith("ic")) and not loaded_ngc:
+            catalog.update(DataLoader()._load_catalog("ngc"))
+            loaded_ngc = True
+
+        elif (name.startswith("m") or name.startswith("messier")) and not loaded_messier:
+            catalog.update(DataLoader()._load_catalog("m"))
+            loaded_messier = True
 
     objects = []
 
@@ -54,13 +67,13 @@ def required_fov_from_names(
             obj.PA if hasattr(obj, "PA") and not pd.isna(obj.PA) else 0
         )
 
-        x_pad = math.radians(padding_percentage * setup_X / 100.0)
-        y_pad = math.radians(padding_percentage * setup_Y / 100.0)
+        x_pad = math.radians(padding_percentage * fov_width / 100.0)
+        y_pad = math.radians(padding_percentage * fov_height / 100.0)
 
         width = (x_max - x_min) + 2 * x_pad
         height = (y_max - y_min) + 2 * y_pad
 
-        total_percent = (width / math.radians(setup_Y)) * (height / math.radians(setup_X)) * 100
+        total_percent = (width / math.radians(fov_height)) * (height / math.radians(fov_width)) * 100
 
         return {
             "objects": names,
@@ -119,19 +132,25 @@ def required_fov_from_names(
         y_min = min(y_min, ey_min)
         y_max = max(y_max, ey_max)
 
-    x_pad = math.radians(padding_percentage * setup_X / 100.0)
-    y_pad = math.radians(padding_percentage * setup_Y / 100.0)
+    x_pad = math.radians(padding_percentage * fov_width / 100.0)
+    y_pad = math.radians(padding_percentage * fov_height / 100.0)
 
     width = (x_max - x_min) + 2 * x_pad
     height = (y_max - y_min) + 2 * y_pad
 
-    total_percent = (width / math.radians(setup_Y)) * (height / math.radians(setup_X)) * 100
+    total_percent = (width / math.radians(fov_height)) * (height / math.radians(fov_width)) * 100
+
+    fits = (
+        width <= fov_width and
+        height <= fov_height
+    )
 
     return {
         "objects": names,
+        "fits": fits,
         "center_ra": center_ra_str,
         "center_dec": center_dec_str,
         "fov_width_deg": round(math.degrees(width), 2),
         "fov_height_deg": round(math.degrees(height), 2),
-        "percent_of_setup_fov": f"{round(total_percent, 2)}%"
+        "percent_of_setup_fov": round(total_percent, 2)
     }

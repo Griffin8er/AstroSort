@@ -4,17 +4,16 @@ from ._utils import Utils
 from ._AstroObject import AstroObject
 
 class DataLoader:
-    def __init__(self, dataset_name):
-        if dataset_name in ('ngc', 'ic'):
-            self.dataset_path = files("AstroSort._data").joinpath("NI2026.csv")
-        elif dataset_name in ('m', 'messier'):
-            raise NotImplementedError("Messier catalog loading not implemented yet.")
-        else:
-            raise ValueError(f"Unknown dataset name: {dataset_name}")
-        
+    _cache = {}
+
+    def __init__(self):
+        pass
+
     def _load_ngc_ic_catalog(self):
 
-        df = pd.read_csv(self.dataset_path, encoding="cp1252")
+        dataset_path = files("AstroSort._data").joinpath("NI2026.csv")
+
+        df = pd.read_csv(dataset_path, encoding="cp1252")
 
         catalog = {}
 
@@ -58,3 +57,24 @@ class DataLoader:
             )
 
         return catalog
+    
+    def _load_messier_catalog(self):
+        raise NotImplementedError("Messier catalog loading not implemented yet.")
+    
+    def _load_catalog(self, dataset_name):
+        dataset_name = Utils._text_normalize(dataset_name)
+
+        if dataset_name in ("ngc", "ic"):
+            key = "ngc"
+            if key not in self._cache:
+                self._cache[key] = self._load_ngc_ic_catalog()
+            return self._cache[key]
+
+        elif dataset_name in ("m", "messier"):
+            key = "m"
+            if key not in self._cache:
+                self._cache[key] = self._load_messier_catalog()
+            return self._cache[key]
+
+        else:
+            raise ValueError(f"Unknown dataset name: {dataset_name}")
