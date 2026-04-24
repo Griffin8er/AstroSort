@@ -1,10 +1,6 @@
-from AstroSort import required_fov
+from AstroSort import fov_checker
 
-result = required_fov.required_fov_from_names(
-    ["NGC 3031", "NGC 3034"],
-    setup_X=2.59,
-    setup_Y=2.59,
-    padding_percentage=5
-)
 
-print(result)
+results = fov_checker(["M 65", "NGC 3627", "NGC 3628"], padding_percentage=10, fov_width=2.59, fov_height=2.59)
+
+print(results)
