@@ -3,13 +3,49 @@ import pandas as pd
 from ._utils import Utils
 from ._loader import DataLoader
 
+df = pd.read_csv
 
 def fov_checker(
-        names,
-        padding_percentage=0.0,
-        fov_width=2.59,
-        fov_height=2.59,
-        ):
+        names:list[str],
+        padding_percentage:int=0.0,
+        fov_width:float=2.59,
+        fov_height:float=2.59
+        )->dict[str, list[str] | str | bool | float]:
+    
+    '''
+    Obtain the required FOV to fit the specified objects, and check if it 
+    fits within the provided FOV dimensions.
+
+    Parameters:
+    - names: List of object names (e.g., ["M 65", "NGC 3627"])
+    - padding_percentage: Percentage of padding to add around the objects
+    - fov_width: Width of the available FOV in degrees
+    - fov_height: Height of the available FOV in degrees
+
+    Returns:
+    A dictionary containing the objects, whether they fit within the provided 
+    FOV, the center RA and Dec, the required FOV dimensions, and the percentage 
+    of the provided FOV that would be used.
+
+    Example:
+    results = fov_checker(
+        ["M 65", "NGC 3627", "NGC 3628"], 
+        padding_percentage=10, 
+        fov_width=2.59, 
+        fov_height=2.59
+    )
+    print(results)
+
+    Output:
+    {
+        'objects': ['M 65', 'NGC 3627', 'NGC 3628'], 
+        'fits': True, 'center_ra': '11.19.49', 
+        'center_dec': '13.13.25', 
+        'fov_width_deg': 0.98, 
+        'fov_height_deg': 1.23, 
+        'percent_of_setup_fov': 17.94
+    }
+    '''
 
     if not names:
         raise ValueError("names list cannot be empty")
@@ -75,8 +111,14 @@ def fov_checker(
 
         total_percent = (width / math.radians(fov_height)) * (height / math.radians(fov_width)) * 100
 
+        fits = (
+            width <= math.radians(fov_width) and
+            height <= math.radians(fov_height)
+        )
+
         return {
             "objects": names,
+            "fits": fits,
             "center_ra": Utils._radians_to_ra_string(obj.ra_rad),
             "center_dec": Utils._radians_to_dec_string(obj.dec_rad),
             "fov_width_deg": round(math.degrees(width), 2),
@@ -141,8 +183,8 @@ def fov_checker(
     total_percent = (width / math.radians(fov_height)) * (height / math.radians(fov_width)) * 100
 
     fits = (
-        width <= fov_width and
-        height <= fov_height
+        width <= math.radians(fov_width) and
+        height <= math.radians(fov_height)
     )
 
     return {

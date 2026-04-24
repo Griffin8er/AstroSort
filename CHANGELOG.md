@@ -1,5 +1,20 @@
 # Change Log
 
+## Version 0.1.0
+
+_New dataset and README.md_
+
+### Added
+- `data/Messier_to_NGC.csv`
+    - Provides a list of Messier catalog objects and maps them to NGC
+    - Select Messier objects are coded manually instead of from NGC dataset
+
+### Changed
+- `README.md`
+    - Yay, finally!
+- `_loader.py`
+    - Load messier function that adds messier AstroObjects
+
 ## Version 0.0.4 - 2026-04-23
 
 _Added caching for quicker load times on consecutive requests_
