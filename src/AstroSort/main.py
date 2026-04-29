@@ -1,7 +1,9 @@
 import math
+
 import pandas as pd
-from ._utils import Utils
+
 from ._loader import DataLoader
+from ._utils import Utils
 
 
 def fov_checker(
