@@ -163,11 +163,11 @@ class Utils:
     ) -> dict[str:float]:
 
         sky_mag = 22.28078 / (1 + math.exp(-(-0.474685 * bortle + 5.3244)))
-        if horizon_distance != None:
+        if horizon_distance is not None:
             alt = max(1.0, min(90.0, horizon_distance))
             airmass = 1.0 / math.sin(math.radians(alt))
             horizon_penalty = 0.25 * (airmass - 1.0)
-        if moon_distance != None:
+        if moon_distance is not None:
             moon_sep = max(1.0, min(180.0, moon_distance))
             moon_distance_factor = math.exp(-moon_sep / 35.0)
             moon_penalty = moon_prop * 2.5 * moon_distance_factor
@@ -184,6 +184,8 @@ class Utils:
             "obj_surf_mag": round(obj_mag, 2),
             "adj_sky_mag": round(adj_sky_mag, 2),
             "mag_diff": round(mag_diff, 2),
-            "horizon_penalty": (round(horizon_penalty, 2) if horizon_distance else None),
+            "horizon_penalty": (
+                round(horizon_penalty, 2) if horizon_distance else None
+            ),
             "moon_penalty": (round(moon_penalty, 2) if moon_distance else None),
         }
