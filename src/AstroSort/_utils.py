@@ -7,24 +7,24 @@ class Utils:
         return text.strip().lower()
 
     @staticmethod
-    def _parse_ra(RH:str, RM:str, RS:str) -> float:
-        hours = float(RH) + float(RM)/60 + float(RS)/3600
+    def _parse_ra(RH: str, RM: str, RS: str) -> float:
+        hours = float(RH) + float(RM) / 60 + float(RS) / 3600
         return math.radians(hours * 15)
 
     @staticmethod
-    def _parse_dec(DG:str, DM:str, DS:str) -> float:
+    def _parse_dec(DG: str, DM: str, DS: str) -> float:
         sign = -1 if float(DG) < 0 else 1
 
         deg = abs(float(DG))
         minutes = float(DM)
         seconds = float(DS)
 
-        total_deg = deg + minutes/60 + seconds/3600
+        total_deg = deg + minutes / 60 + seconds / 3600
 
         return math.radians(sign * total_deg)
 
     @staticmethod
-    def _radians_to_ra_string(ra_rad:float) -> str:
+    def _radians_to_ra_string(ra_rad: float) -> str:
         """
         Convert RA radians -> 'HH.MM.SS'
         """
@@ -53,7 +53,7 @@ class Utils:
         return f"{h:02d}.{m:02d}.{s:02d}"
 
     @staticmethod
-    def _radians_to_dec_string(dec_rad:float) -> str:
+    def _radians_to_dec_string(dec_rad: float) -> str:
         """
         Convert Dec radians -> 'DD.MM.SS'
         """
@@ -82,15 +82,15 @@ class Utils:
         return f"{sign}{d:02d}.{m:02d}.{s:02d}"
 
     @staticmethod
-    def _ra_dec_to_unit_vector(ra:float, dec:float) -> tuple[float, float, float]:
+    def _ra_dec_to_unit_vector(ra: float, dec: float) -> tuple[float, float, float]:
         x = math.cos(dec) * math.cos(ra)
         y = math.cos(dec) * math.sin(ra)
         z = math.sin(dec)
         return x, y, z
 
     @staticmethod
-    def _unit_vector_to_ra_dec(x:float, y:float, z:float) -> tuple[float, float]:
-        r = math.sqrt(x*x + y*y + z*z)
+    def _unit_vector_to_ra_dec(x: float, y: float, z: float) -> tuple[float, float]:
+        r = math.sqrt(x * x + y * y + z * z)
 
         x /= r
         y /= r
@@ -106,11 +106,7 @@ class Utils:
 
     @staticmethod
     def _ellipse_extent(
-        x0:float, 
-        y0:float, 
-        major_arcmin:float, 
-        minor_arcmin:float, 
-        pa_deg:float
+        x0: float, y0: float, major_arcmin: float, minor_arcmin: float, pa_deg: float
     ) -> tuple[float, float, float, float]:
 
         # Convert arcmin → radians
@@ -124,59 +120,49 @@ class Utils:
         sin_t = math.sin(theta)
 
         # Rotated ellipse bounding box
-        dx = math.sqrt((a*cos_t)**2 + (b*sin_t)**2)
-        dy = math.sqrt((a*sin_t)**2 + (b*cos_t)**2)
+        dx = math.sqrt((a * cos_t) ** 2 + (b * sin_t) ** 2)
+        dy = math.sqrt((a * sin_t) ** 2 + (b * cos_t) ** 2)
 
-        return (
-            x0 - dx,
-            x0 + dx,
-            y0 - dy,
-            y0 + dy
-        )
+        return (x0 - dx, x0 + dx, y0 - dy, y0 + dy)
 
     @staticmethod
-    def _project_gnomonic(ra:float, dec:float, ra0:float, dec0:float) -> tuple[float, float]:
+    def _project_gnomonic(
+        ra: float, dec: float, ra0: float, dec0: float
+    ) -> tuple[float, float]:
 
         delta_ra = ra - ra0
 
-        cos_c = (
-            math.sin(dec0) * math.sin(dec) +
-            math.cos(dec0) * math.cos(dec) * math.cos(delta_ra)
-        )
+        cos_c = math.sin(dec0) * math.sin(dec) + math.cos(dec0) * math.cos(
+            dec
+        ) * math.cos(delta_ra)
 
         if cos_c <= 0:
-            raise ValueError(
-                "Objects too far apart for single-frame projection."
-            )
+            raise ValueError("Objects too far apart for single-frame projection.")
 
         x = math.cos(dec) * math.sin(delta_ra) / cos_c
 
         y = (
-            math.cos(dec0) * math.sin(dec) -
-            math.sin(dec0) * math.cos(dec) *
-            math.cos(delta_ra)
+            math.cos(dec0) * math.sin(dec)
+            - math.sin(dec0) * math.cos(dec) * math.cos(delta_ra)
         ) / cos_c
 
         return x, y
-    
+
     @staticmethod
-    def _obj_surface_mag(mag:float, x_arcmin:float, y_arcmin:float) -> float:
+    def _obj_surface_mag(mag: float, x_arcmin: float, y_arcmin: float) -> float:
         area = x_arcmin * y_arcmin * 3600
         return mag + 2.5 * math.log10(area)
-    
+
     @staticmethod
     def _get_mag_diff(
-        object:str, 
-        bortle:float,
-        moon_prop:float, 
-        horizon_distance:float=None, 
-        moon_distance:float=None
-    ) -> dict[str: float]:
+        object: str,
+        bortle: float,
+        moon_prop: float,
+        horizon_distance: float = None,
+        moon_distance: float = None,
+    ) -> dict[str:float]:
 
-        sky_mag = (
-            22.28078 /
-            (1 + math.exp(-(-0.474685 * bortle + 5.3244)))
-        )
+        sky_mag = 22.28078 / (1 + math.exp(-(-0.474685 * bortle + 5.3244)))
         if horizon_distance != None:
             alt = max(1.0, min(90.0, horizon_distance))
             airmass = 1.0 / math.sin(math.radians(alt))
@@ -186,7 +172,11 @@ class Utils:
             moon_distance_factor = math.exp(-moon_sep / 35.0)
             moon_penalty = moon_prop * 2.5 * moon_distance_factor
 
-        adj_sky_mag = sky_mag - (horizon_penalty if horizon_penalty else 0) - (moon_penalty if moon_penalty else 0)
+        adj_sky_mag = (
+            sky_mag
+            - (horizon_penalty if horizon_penalty else 0)
+            - (moon_penalty if moon_penalty else 0)
+        )
         obj_mag = Utils._obj_surface_mag(object.MAG, object.X, object.Y)
         mag_diff = obj_mag - adj_sky_mag
 
@@ -195,5 +185,5 @@ class Utils:
             "adj_sky_mag": round(adj_sky_mag, 2),
             "mag_diff": round(mag_diff, 2),
             "horizon_penalty": (round(horizon_penalty, 2) if horizon_penalty else None),
-            "moon_penalty": (round(moon_penalty, 2) if moon_penalty else None)
+            "moon_penalty": (round(moon_penalty, 2) if moon_penalty else None),
         }

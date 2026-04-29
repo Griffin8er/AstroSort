@@ -8,7 +8,7 @@ class Utils:
 
     @staticmethod
     def _parse_ra(RH, RM, RS):
-        hours = float(RH) + float(RM)/60 + float(RS)/3600
+        hours = float(RH) + float(RM) / 60 + float(RS) / 3600
         return math.radians(hours * 15)
 
     @staticmethod
@@ -19,7 +19,7 @@ class Utils:
         minutes = float(DM)
         seconds = float(DS)
 
-        total_deg = deg + minutes/60 + seconds/3600
+        total_deg = deg + minutes / 60 + seconds / 3600
 
         return math.radians(sign * total_deg)
 
@@ -90,7 +90,7 @@ class Utils:
 
     @staticmethod
     def _unit_vector_to_ra_dec(x, y, z):
-        r = math.sqrt(x*x + y*y + z*z)
+        r = math.sqrt(x * x + y * y + z * z)
 
         x /= r
         y /= r
@@ -118,50 +118,43 @@ class Utils:
         sin_t = math.sin(theta)
 
         # Rotated ellipse bounding box
-        dx = math.sqrt((a*cos_t)**2 + (b*sin_t)**2)
-        dy = math.sqrt((a*sin_t)**2 + (b*cos_t)**2)
+        dx = math.sqrt((a * cos_t) ** 2 + (b * sin_t) ** 2)
+        dy = math.sqrt((a * sin_t) ** 2 + (b * cos_t) ** 2)
 
-        return (
-            x0 - dx,
-            x0 + dx,
-            y0 - dy,
-            y0 + dy
-        )
+        return (x0 - dx, x0 + dx, y0 - dy, y0 + dy)
 
     @staticmethod
     def _project_gnomonic(ra, dec, ra0, dec0):
 
         delta_ra = ra - ra0
 
-        cos_c = (
-            math.sin(dec0) * math.sin(dec) +
-            math.cos(dec0) * math.cos(dec) * math.cos(delta_ra)
-        )
+        cos_c = math.sin(dec0) * math.sin(dec) + math.cos(dec0) * math.cos(
+            dec
+        ) * math.cos(delta_ra)
 
         if cos_c <= 0:
-            raise ValueError(
-                "Objects too far apart for single-frame projection."
-            )
+            raise ValueError("Objects too far apart for single-frame projection.")
 
         x = math.cos(dec) * math.sin(delta_ra) / cos_c
 
         y = (
-            math.cos(dec0) * math.sin(dec) -
-            math.sin(dec0) * math.cos(dec) *
-            math.cos(delta_ra)
+            math.cos(dec0) * math.sin(dec)
+            - math.sin(dec0) * math.cos(dec) * math.cos(delta_ra)
         ) / cos_c
 
         return x, y
-    
+
     @staticmethod
     def _obj_surface_mag(mag, x_arcmin, y_arcmin):
         area = x_arcmin * y_arcmin * 3600
         return mag + 2.5 * math.log10(area)
-    
+
     @staticmethod
     def _get_mag_diff(object, bortle, moon_prop) -> float:
 
-        sky_mag = (22.28078 / (1 + math.exp(-(-.474685*bortle + 5.3244)))) - moon_prop * 2.5
+        sky_mag = (
+            22.28078 / (1 + math.exp(-(-0.474685 * bortle + 5.3244)))
+        ) - moon_prop * 2.5
 
         obj_mag = Utils._obj_surface_mag(object.MAG, object.X, object.Y)
 
@@ -170,5 +163,5 @@ class Utils:
         return {
             "obj_surf_mag": round(obj_mag, 2),
             "adj_sky_mag": round(sky_mag, 2),
-            "mag_diff": round(mag_diff, 2)
+            "mag_diff": round(mag_diff, 2),
         }
