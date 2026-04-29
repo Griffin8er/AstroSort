@@ -184,6 +184,6 @@ class Utils:
             "obj_surf_mag": round(obj_mag, 2),
             "adj_sky_mag": round(adj_sky_mag, 2),
             "mag_diff": round(mag_diff, 2),
-            "horizon_penalty": (round(horizon_penalty, 2) if horizon_penalty else None),
-            "moon_penalty": (round(moon_penalty, 2) if moon_penalty else None),
+            "horizon_penalty": (round(horizon_penalty, 2) if horizon_distance else None),
+            "moon_penalty": (round(moon_penalty, 2) if moon_distance else None),
         }
