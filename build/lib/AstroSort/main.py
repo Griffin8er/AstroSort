@@ -3,7 +3,6 @@ import pandas as pd
 from ._utils import Utils
 from ._loader import DataLoader
 
-df = pd.read_csv
 
 def fov_checker(
         names:list[str],
@@ -12,40 +11,81 @@ def fov_checker(
         fov_height:float=2.59
         )->dict[str, list[str] | str | bool | float]:
     
-    '''
-    Obtain the required FOV to fit the specified objects, and check if it 
-    fits within the provided FOV dimensions.
+    """
+    Compute the required field-of-view (FoV) needed to frame a set of
+    astronomical objects and determine whether they fit within a given
+    FoV configuration.
 
-    Parameters:
-    - names: List of object names (e.g., ["M 65", "NGC 3627"])
-    - padding_percentage: Percentage of padding to add around the objects
-    - fov_width: Width of the available FOV in degrees
-    - fov_height: Height of the available FOV in degrees
+    Parameters
+    ----------
+    names : list[str]
+        List of object names to include in the FoV calculation.
+        Names may be Messier, NGC, or IC objects.
 
-    Returns:
-    A dictionary containing the objects, whether they fit within the provided 
-    FOV, the center RA and Dec, the required FOV dimensions, and the percentage 
-    of the provided FOV that would be used.
+        Examples:
+            ["M 65", "NGC 3627", "NGC 3628"]
 
-    Example:
-    results = fov_checker(
-        ["M 65", "NGC 3627", "NGC 3628"], 
-        padding_percentage=10, 
-        fov_width=2.59, 
-        fov_height=2.59
-    )
-    print(results)
+    padding_percentage : float, optional
+        Percentage of padding added around the outermost objects.
+        This increases the required FoV to provide visual margins.
 
-    Output:
+    fov_width : float, optional
+        Width of the available FoV in degrees.
+
+    fov_height : float, optional
+        Height of the available FoV in degrees.
+
+    Returns
+    -------
+    dict
+        A dictionary containing:
+
+        objects : list[str]
+            The resolved object names used in the calculation.
+
+        fits : bool
+            True if the required FoV fits within the provided
+            FoV dimensions.
+
+        center_ra : str
+            Right Ascension of the calculated center
+            (formatted as HH.MM.SS).
+
+        center_dec : str
+            Declination of the calculated center
+            (formatted as DD.MM.SS).
+
+        fov_width_deg : float
+            Required FoV width in degrees.
+
+        fov_height_deg : float
+            Required FoV height in degrees.
+
+        percent_of_setup_fov : float
+            Percentage of the provided FoV area required
+            to frame the objects.
+
+    Examples
+    --------
+    >>> results = fov_checker(
+    ...     ["M 65", "NGC 3627", "NGC 3628"],
+    ...     padding_percentage=10,
+    ...     fov_width=2.59,
+    ...     fov_height=2.59
+    ... )
+
+    >>> print(results)
+
     {
-        'objects': ['M 65', 'NGC 3627', 'NGC 3628'], 
-        'fits': True, 'center_ra': '11.19.49', 
-        'center_dec': '13.13.25', 
-        'fov_width_deg': 0.98, 
-        'fov_height_deg': 1.23, 
+        'objects': ['M 65', 'NGC 3627', 'NGC 3628'],
+        'fits': True,
+        'center_ra': '11.19.49',
+        'center_dec': '13.13.25',
+        'fov_width_deg': 0.98,
+        'fov_height_deg': 1.23,
         'percent_of_setup_fov': 17.94
     }
-    '''
+    """
 
     if not names:
         raise ValueError("names list cannot be empty")
@@ -56,21 +96,7 @@ def fov_checker(
     if padding_percentage < 0:
         raise ValueError("padding_percentage must be >= 0")
     
-    catalog = {}
-
-    loaded_ngc = False
-    loaded_messier = False
-
-    for name in names:
-        name = Utils._text_normalize(name)
-
-        if (name.startswith("ngc") or name.startswith("ic")) and not loaded_ngc:
-            catalog.update(DataLoader()._load_catalog("ngc"))
-            loaded_ngc = True
-
-        elif (name.startswith("m") or name.startswith("messier")) and not loaded_messier:
-            catalog.update(DataLoader()._load_catalog("m"))
-            loaded_messier = True
+    catalog = DataLoader().load_catalog()
 
     objects = []
 
@@ -196,3 +222,44 @@ def fov_checker(
         "fov_height_deg": round(math.degrees(height), 2),
         "percent_of_setup_fov": round(total_percent, 2)
     }
+
+
+def visibility(
+        names:list[str],
+        moon_prop:float=0,
+        bortle:float=1
+    )->dict[str, list[str] | str | bool | float]:
+
+    """
+    Placeholder for future visibility function implementation.
+    """
+    
+    catalog = DataLoader().load_catalog()
+
+    objects = []
+
+    for name in names:
+        key = name.upper()
+
+        if key not in catalog:
+            raise ValueError(
+                f"{name} not found in catalog."
+            )
+
+        objects.append(catalog[key])
+
+    results = {}
+
+    for obj in objects:
+        orig_cont = Utils._get_mag_diff(obj, 1, 0)["mag_diff"]
+        adj_cont = Utils._get_mag_diff(obj, bortle=bortle, moon_prop=moon_prop)["mag_diff"]
+        contrast_factor = round(10 ** (.4 * (adj_cont-orig_cont)), 2)
+
+        results[obj.name] = {
+            "Base_magnitude_diff": orig_cont,
+            "Adjusted_magnitude_diff": adj_cont,
+            "Magnitude_change": abs(orig_cont-adj_cont),
+            "Contrast_loss": contrast_factor
+        }
+
+    return results

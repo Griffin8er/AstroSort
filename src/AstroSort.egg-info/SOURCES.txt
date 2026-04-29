@@ -5,7 +5,7 @@ src/AstroSort/_AstroObject.py
 src/AstroSort/__init__.py
 src/AstroSort/_loader.py
 src/AstroSort/_utils.py
-src/AstroSort/required_fov.py
+src/AstroSort/main.py
 src/AstroSort.egg-info/PKG-INFO
 src/AstroSort.egg-info/SOURCES.txt
 src/AstroSort.egg-info/dependency_links.txt
