@@ -1,6 +1,9 @@
-from AstroSort import fov_checker
+from AstroSort import visibility
 
-
-results = fov_checker(["M 65", "NGC 3627", "NGC 3628"], padding_percentage=10, fov_width=2.59, fov_height=2.59)
+results = visibility(
+    ["M 65", "NGC 3627", "NGC 3628"],
+    bortle=7.4,
+    moon_prop=1
+)
 
 print(results)

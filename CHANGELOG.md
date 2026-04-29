@@ -1,5 +1,25 @@
 # Change Log
 
+## Version 0.1.1
+
+_New function `visibility()`_
+
+### Added
+- `visibility()`
+    - Allows users to input bortle and moon proportion showing to obtain visibility of objects
+    - Uses similar caching to `fov_checker()`
+- `_utils.py`
+    - `_obj_surface_mag()`
+        - Helper for `_get_mag_diff()`
+        - Turns magnitude into magnitude per arcsec^2
+    - `_get_mag_diff()`
+        - Runs multiple small models to approximate changes in object visibility
+        - Regression model to convert bortle to magnitude level
+
+### Changed
+- Added more typing to increase readability
+- Increased caching to a global level in users directory to increase overall speed
+
 ## Version 0.1.0
 
 _New dataset and README.md_

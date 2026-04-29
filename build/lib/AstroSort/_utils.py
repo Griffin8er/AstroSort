@@ -3,16 +3,16 @@ import math
 
 class Utils:
     @staticmethod
-    def _text_normalize(text: str) -> str:
+    def _text_normalize(text):
         return text.strip().lower()
 
     @staticmethod
-    def _parse_ra(RH:str, RM:str, RS:str) -> float:
+    def _parse_ra(RH, RM, RS):
         hours = float(RH) + float(RM)/60 + float(RS)/3600
         return math.radians(hours * 15)
 
     @staticmethod
-    def _parse_dec(DG:str, DM:str, DS:str) -> float:
+    def _parse_dec(DG, DM, DS):
         sign = -1 if float(DG) < 0 else 1
 
         deg = abs(float(DG))
@@ -24,7 +24,7 @@ class Utils:
         return math.radians(sign * total_deg)
 
     @staticmethod
-    def _radians_to_ra_string(ra_rad:float) -> str:
+    def _radians_to_ra_string(ra_rad):
         """
         Convert RA radians -> 'HH.MM.SS'
         """
@@ -53,7 +53,7 @@ class Utils:
         return f"{h:02d}.{m:02d}.{s:02d}"
 
     @staticmethod
-    def _radians_to_dec_string(dec_rad:float) -> str:
+    def _radians_to_dec_string(dec_rad):
         """
         Convert Dec radians -> 'DD.MM.SS'
         """
@@ -82,14 +82,14 @@ class Utils:
         return f"{sign}{d:02d}.{m:02d}.{s:02d}"
 
     @staticmethod
-    def _ra_dec_to_unit_vector(ra:float, dec:float) -> tuple[float, float, float]:
+    def _ra_dec_to_unit_vector(ra, dec):
         x = math.cos(dec) * math.cos(ra)
         y = math.cos(dec) * math.sin(ra)
         z = math.sin(dec)
         return x, y, z
 
     @staticmethod
-    def _unit_vector_to_ra_dec(x:float, y:float, z:float) -> tuple[float, float]:
+    def _unit_vector_to_ra_dec(x, y, z):
         r = math.sqrt(x*x + y*y + z*z)
 
         x /= r
@@ -105,13 +105,7 @@ class Utils:
         return ra, dec
 
     @staticmethod
-    def _ellipse_extent(
-        x0:float, 
-        y0:float, 
-        major_arcmin:float, 
-        minor_arcmin:float, 
-        pa_deg:float
-    ) -> tuple[float, float, float, float]:
+    def _ellipse_extent(x0, y0, major_arcmin, minor_arcmin, pa_deg):
 
         # Convert arcmin → radians
         a = math.radians(major_arcmin / 60.0) / 2.0
@@ -135,7 +129,7 @@ class Utils:
         )
 
     @staticmethod
-    def _project_gnomonic(ra:float, dec:float, ra0:float, dec0:float) -> tuple[float, float]:
+    def _project_gnomonic(ra, dec, ra0, dec0):
 
         delta_ra = ra - ra0
 
@@ -160,40 +154,21 @@ class Utils:
         return x, y
     
     @staticmethod
-    def _obj_surface_mag(mag:float, x_arcmin:float, y_arcmin:float) -> float:
+    def _obj_surface_mag(mag, x_arcmin, y_arcmin):
         area = x_arcmin * y_arcmin * 3600
         return mag + 2.5 * math.log10(area)
     
     @staticmethod
-    def _get_mag_diff(
-        object:str, 
-        bortle:float,
-        moon_prop:float, 
-        horizon_distance:float=None, 
-        moon_distance:float=None
-    ) -> dict[str: float]:
+    def _get_mag_diff(object, bortle, moon_prop) -> float:
 
-        sky_mag = (
-            22.28078 /
-            (1 + math.exp(-(-0.474685 * bortle + 5.3244)))
-        )
-        if horizon_distance != None:
-            alt = max(1.0, min(90.0, horizon_distance))
-            airmass = 1.0 / math.sin(math.radians(alt))
-            horizon_penalty = 0.25 * (airmass - 1.0)
-        if moon_distance != None:
-            moon_sep = max(1.0, min(180.0, moon_distance))
-            moon_distance_factor = math.exp(-moon_sep / 35.0)
-            moon_penalty = moon_prop * 2.5 * moon_distance_factor
+        sky_mag = (22.28078 / (1 + math.exp(-(-.474685*bortle + 5.3244)))) - moon_prop * 2.5
 
-        adj_sky_mag = sky_mag - (horizon_penalty if horizon_penalty else 0) - (moon_penalty if moon_penalty else 0)
         obj_mag = Utils._obj_surface_mag(object.MAG, object.X, object.Y)
-        mag_diff = obj_mag - adj_sky_mag
+
+        mag_diff = obj_mag - sky_mag
 
         return {
             "obj_surf_mag": round(obj_mag, 2),
-            "adj_sky_mag": round(adj_sky_mag, 2),
-            "mag_diff": round(mag_diff, 2),
-            "horizon_penalty": (round(horizon_penalty, 2) if horizon_penalty else None),
-            "moon_penalty": (round(moon_penalty, 2) if moon_penalty else None)
+            "adj_sky_mag": round(sky_mag, 2),
+            "mag_diff": round(mag_diff, 2)
         }
