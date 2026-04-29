@@ -1,10 +1,12 @@
+import pickle
 from importlib.resources import files
 from pathlib import Path
-import pickle
-from platformdirs import user_cache_dir
+
 import pandas as pd
-from ._utils import Utils
+from platformdirs import user_cache_dir
+
 from ._AstroObject import AstroObject
+from ._utils import Utils
 
 
 class DataLoader:
@@ -30,10 +32,7 @@ class DataLoader:
 
             cat = str(row["N"]).strip()
 
-            if cat == "N":
-                name = "NGC"
-            else:
-                name = "IC"
+            name = "NGC" if cat == "N" else "IC"
 
             ra = Utils._parse_ra(row["RH"], row["RM"], row["RS"])
 
